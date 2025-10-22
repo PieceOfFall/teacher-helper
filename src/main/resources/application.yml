@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: teacher-helper
+
+server:
+  port: 9527
+
+qq:
+  account: 3479349206
