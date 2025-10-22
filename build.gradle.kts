@@ -17,9 +17,18 @@ java {
 
 repositories {
 	mavenCentral()
+	maven {
+		name = "Spring Milestones"
+		url = uri("https://repo.spring.io/milestone")
+		mavenContent {
+			releasesOnly()
+		}
+	}
 }
 
 dependencies {
+	implementation("com.alibaba.cloud.ai","spring-ai-alibaba-starter","1.0.0-M6.1")
+
 	val miraiVersion = "2.16.0"
 	api("net.mamoe", "mirai-core-api", miraiVersion)
 	runtimeOnly("net.mamoe", "mirai-core", miraiVersion)

@@ -1,9 +1,11 @@
-spring:
-  application:
-    name: teacher-helper
-
 server:
   port: 9527
 
 qq:
   account: 3479349206
+
+spring:
+  application:
+    name: teacher-helper
+  profiles:
+    active: dev

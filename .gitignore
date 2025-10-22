@@ -42,3 +42,6 @@ out/
 ### QQ ###
 device.json
 cache
+
+### Spring ###
+/src/main/resources/application-dev.yml
