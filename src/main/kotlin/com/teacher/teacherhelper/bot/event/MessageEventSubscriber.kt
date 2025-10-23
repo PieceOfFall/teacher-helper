@@ -1,6 +1,5 @@
 package com.teacher.teacherhelper.bot.event
 
-import net.mamoe.mirai.event.AbstractEvent
 import net.mamoe.mirai.event.EventChannel
 import net.mamoe.mirai.event.events.BotEvent
 import net.mamoe.mirai.event.events.MessageEvent
