@@ -1,8 +1,15 @@
 package com.teacher.teacherhelper.bot.event
 
+import com.teacher.teacherhelper.bot.api.BotSender
+import jakarta.annotation.PostConstruct
 import net.mamoe.mirai.event.EventChannel
 import net.mamoe.mirai.event.events.BotEvent
 import net.mamoe.mirai.event.events.MessageEvent
+import net.mamoe.mirai.message.data.MessageSourceKind
+import net.mamoe.mirai.message.data.source
+import org.springframework.ai.chat.client.ChatClient
+import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY
+import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY
 import org.springframework.stereotype.Component
 
 const val PROMPT = """
@@ -38,11 +45,27 @@ const val PROMPT = """
 @Component
 class MessageEventSubscriber(
     private val eventChannel: EventChannel<BotEvent>,
+    private val chatClient: ChatClient,
+    private val botSender: BotSender
 ) : EventSubscriber {
 
+    @PostConstruct
     override fun subscribe() {
         eventChannel.subscribeAlways<MessageEvent> { event ->
-            println("Event: $event")
+            event.message.source.kind.takeUnless { it !== MessageSourceKind.FRIEND } ?: return@subscribeAlways
+            val content = chatClient
+                .prompt(PROMPT)
+                .user(event.message.contentToString())
+                .advisors { spec ->
+                    spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, event.sender.id)
+                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10)
+                }
+                .call()
+                .content()
+                ?.filter { it != '*' && it != '#' }
+            content?.let {
+                botSender.sendMsg(event.sender.id, content)
+            }
         }
     }
 }

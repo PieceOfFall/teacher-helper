@@ -1,5 +1,6 @@
 package com.teacher.teacherhelper.config
 
+import kotlinx.coroutines.runBlocking
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.BotFactory
 import net.mamoe.mirai.auth.BotAuthorization
@@ -10,6 +11,9 @@ import org.springframework.ai.chat.model.ChatModel
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import top.mrxiaom.overflow.BotBuilder
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @Configuration
 class BotConfig(
@@ -18,11 +22,11 @@ class BotConfig(
 ) {
 
     @Bean
-    fun initBot(): Bot {
-        return BotFactory.newBot(account, BotAuthorization.byQRCode()) {
-            protocol = BotConfiguration.MiraiProtocol.MACOS
-            fileBasedDeviceInfo()
-
+     fun initBot(): Bot {
+        return runBlocking {
+            BotBuilder.positive("ws://127.0.0.1:3001")
+                .token(URLEncoder.encode("Xogc}xNoqjHhpE3M", StandardCharsets.UTF_8.toString()))
+                .connect() as Bot
         }
     }
 

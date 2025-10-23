@@ -11,12 +11,13 @@ description = "teacher-helper"
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
+		languageVersion = JavaLanguageVersion.of(17)
 	}
 }
 
 repositories {
 	mavenCentral()
+	maven("https://central.sonatype.com/repository/maven-snapshots/")
 	maven {
 		name = "Spring Milestones"
 		url = uri("https://repo.spring.io/milestone")
@@ -31,7 +32,7 @@ dependencies {
 
 	val miraiVersion = "2.16.0"
 	api("net.mamoe", "mirai-core-api", miraiVersion)
-	runtimeOnly("net.mamoe", "mirai-core", miraiVersion)
+	implementation("top.mrxiaom.mirai", "overflow-core", "1.0.6.652-7cbd3e3-SNAPSHOT")
 
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
