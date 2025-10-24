@@ -16,7 +16,6 @@ class BotConfig(
     @Value("\${qq.server.address}") private val address: String,
     @Value("\${qq.server.token}") private val token: String
 ) {
-
     @Bean
     fun initBot(): Bot {
         return runBlocking {
