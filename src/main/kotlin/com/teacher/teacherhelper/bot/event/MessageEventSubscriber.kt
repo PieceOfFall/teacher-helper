@@ -1,7 +1,14 @@
 package com.teacher.teacherhelper.bot.event
 
 import com.teacher.teacherhelper.bot.api.BotSender
+import com.teacher.teacherhelper.utils.string.FlowStringUtil
+import com.teacher.teacherhelper.utils.string.MarkDownService
 import jakarta.annotation.PostConstruct
+import jakarta.annotation.PreDestroy
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.reactive.asFlow
 import net.mamoe.mirai.event.EventChannel
 import net.mamoe.mirai.event.events.BotEvent
 import net.mamoe.mirai.event.events.MessageEvent
@@ -10,62 +17,51 @@ import net.mamoe.mirai.message.data.source
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY
 import org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
-const val PROMPT = """
-    角色定义：
-你是一名专为高中数学教师设计的智能助教 AI。你的任务是帮助教师备课、讲解、命题、批改、辅导与研究教学方法。
-你要输出准确、清晰、有教学逻辑的数学内容。
-
-工作职责：
-
-备课支持：根据教学目标生成教案、板书设计、例题、拓展题。
-
-讲解与答疑：用通俗语言讲解数学概念与解题思路。
-
-命题与改题：能生成符合高中课程标准的单选题、填空题、解答题，并附详细解析。
-
-教学研究：能比较不同教学法（如函数思想、数形结合法、类比法等），并提出教学建议。
-
-个性化辅导：能根据学生错误类型，生成针对性的讲解与练习。
-
-输出要求：
-
-语言简洁、逻辑严密、符合高中数学教材（人教版/苏教版/北师大版等）风格。
-
-对于每道题，务必附详细的解题步骤与思路分析。
-
-数学表达式请使用 LaTeX 格式。
-
-若教师要求出题，题目需标明题型、难度、考点与解析。
-
-若教师提供学生答案，需进行错误诊断 + 思维分析 + 补救建议。
-"""
 
 @Component
 class MessageEventSubscriber(
+    @Value("\${ai.prompt}") private val prompt: String,
     private val eventChannel: EventChannel<BotEvent>,
     private val chatClient: ChatClient,
-    private val botSender: BotSender
+    private val botSender: BotSender,
+    private val markDownService: MarkDownService
 ) : EventSubscriber {
+
+    // 受管作用域（随 Bean 生命周期取消）
+    private val job = SupervisorJob()
+    private val scope = CoroutineScope(job + Dispatchers.Default)
 
     @PostConstruct
     override fun subscribe() {
         eventChannel.subscribeAlways<MessageEvent> { event ->
-            event.message.source.kind.takeUnless { it !== MessageSourceKind.FRIEND } ?: return@subscribeAlways
-            val content = chatClient
-                .prompt(PROMPT)
+            if (event.message.source.kind != MessageSourceKind.FRIEND) return@subscribeAlways
+
+            val flux = chatClient.prompt()
+                .system(prompt)
                 .user(event.message.contentToString())
-                .advisors { spec ->
-                    spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, event.sender.id)
+                .advisors {
+                    it.param(CHAT_MEMORY_CONVERSATION_ID_KEY, event.sender.id)
                         .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10)
                 }
-                .call()
-                .content()
-                ?.filter { it != '*' && it != '#' }
-            content?.let {
-                botSender.sendMsg(event.sender.id, content)
+                .stream()
+                .content() // Flux<String>
+
+            scope.launch {
+                flux.asFlow() // -> Flow<String>
+                    .let(FlowStringUtil::splitMarkdownByHeader) // 按标题分块
+                    .map(markDownService::stripMarkdownLight)  // 去掉 #、* 等标记
+                    .filter { it.isNotBlank() }
+                    .collect { line -> botSender.sendMsg(event.sender.id, line) }
             }
         }
     }
+
+    @PreDestroy
+    fun shutdown() = job.cancel()
+
 }
+
+

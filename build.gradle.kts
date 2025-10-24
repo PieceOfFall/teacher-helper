@@ -34,6 +34,10 @@ dependencies {
 	api("net.mamoe", "mirai-core-api", miraiVersion)
 	implementation("top.mrxiaom.mirai", "overflow-core", "1.0.6.652-7cbd3e3-SNAPSHOT")
 
+	implementation("org.commonmark:commonmark:0.24.0")
+
+	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.9.0")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
