@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component
 
 @KSlf4j
 @Component
+@Suppress("unused")
 class BotSender(
     private val bot: Bot
 ) {

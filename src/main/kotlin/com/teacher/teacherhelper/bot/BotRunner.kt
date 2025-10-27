@@ -13,9 +13,7 @@ class BotRunner(
     private val bot: Bot,
 ) : ApplicationRunner, DisposableBean {
 
-    override fun run(args: ApplicationArguments) = runBlocking {
-        bot.login()
-    }
+    override fun run(args: ApplicationArguments) = runBlocking { bot.login() }
 
     override fun destroy() = bot.close()
 }

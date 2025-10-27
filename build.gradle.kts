@@ -16,6 +16,7 @@ java {
 }
 
 repositories {
+	mavenLocal()
 	mavenCentral()
 	maven("https://central.sonatype.com/repository/maven-snapshots/")
 	maven {
@@ -36,6 +37,8 @@ dependencies {
 
 	implementation("org.commonmark:commonmark:0.24.0")
 	implementation("org.commonmark:commonmark-ext-gfm-tables:0.24.0")
+
+	implementation("org.scilab.forge:jlatexmath:1.0.7")
 
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.9.0")

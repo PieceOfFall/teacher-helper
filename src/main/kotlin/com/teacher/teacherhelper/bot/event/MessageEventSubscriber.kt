@@ -48,7 +48,7 @@ class MessageEventSubscriber(
         scope.launch {
             flux.asFlow() // -> Flow<String>
                 .let(FlowStringUtil::splitMarkdownByHeader) // 按标题分块
-                .map(markDownService::stripMarkdownLight)  // 去掉 #、* 等标记
+                .map(markDownService::stripMarkdownLight) // 去掉 #、* 等标记
                 .filter { it.isNotBlank() }
                 .collect { line -> botSender.sendMsg(event.sender.id, line) }
         }
