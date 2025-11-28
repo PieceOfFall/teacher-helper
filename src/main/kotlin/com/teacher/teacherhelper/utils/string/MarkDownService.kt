@@ -1,7 +1,6 @@
 package com.teacher.teacherhelper.utils.string
 
 import com.teacher.teacherhelper.utils.model.TableModel
-import net.mamoe.mirai.utils.ExternalResource
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import org.commonmark.ext.gfm.tables.*
 import org.commonmark.node.Node
@@ -11,7 +10,6 @@ import org.scilab.forge.jlatexmath.TeXConstants
 import org.springframework.stereotype.Component
 import java.util.function.Consumer
 import org.scilab.forge.jlatexmath.TeXFormula
-import org.scilab.forge.jlatexmath.TeXIcon
 import java.awt.AlphaComposite
 import java.awt.Color
 import java.awt.Insets
